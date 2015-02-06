@@ -1,5 +1,6 @@
 cache/
 old-cache/
+*.ods
 *.csv
 *.json
 .~lock*

@@ -28,11 +28,10 @@ def go
       "HSTS Header"
     ]
 
-    CSV.foreach(INPUT_CSV) do |row|
+    CSV.foreach(INPUT_CSV, :col_sep => ';') do |row|
       next if row[0].strip.downcase == "domain name"
       domain = row[0].strip.downcase
-
-      next unless domain.end_with?(".gov")
+      next if domain.empty?
 
       # supply a 2nd argument to quickly run it on a particular domain
       if DEBUG_DOMAIN
@@ -59,7 +58,7 @@ def go
         from_domain['force_https'],
         from_domain['hsts'],
         from_domain['hsts_header']
-      ]
+      ] unless from_domain.nil?
 
       # if we wanted to quick test one domain, just quit now
       if DEBUG_DOMAIN
@@ -106,13 +105,19 @@ def check_domain(domain)
       'headers' => (site.response ? site.response.headers : nil)
     }
 
-    cache! from_domain, domain
-    puts "\tFetched, cached."
-    # normalize to be read from cache again
-    from_domain = from_cache!(domain)
+    begin
+      cache! from_domain, domain
+      puts "\tFetched, cached."
+      # normalize to be read from cache again
+      from_domain = from_cache!(domain)
+    rescue Exception => e
+      puts "\t{domain} could not be cached!"
+      from_domain = nil
+    end
+
   end
 
-  {
+  from_domain.nil? ? nil : {
     'domain' => domain,
     'live' => from_domain['site']['live'],
     'redirect' => from_domain['site']['redirect'],
