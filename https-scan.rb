@@ -11,7 +11,9 @@ FileUtils.mkdir_p "cache"
 
 INPUT_CSV = ARGV[0] || "domains.csv"
 
-DEBUG_DOMAIN = ARGV[1]
+DEBUG_DOMAIN = ARGV[2]
+
+COL_SEP = ARGV[1] || ';'
 
 def go
   CSV.open("output.csv", "w") do |analysis|
@@ -28,7 +30,7 @@ def go
       "HSTS Header"
     ]
 
-    CSV.foreach(INPUT_CSV, :col_sep => ';') do |row|
+    CSV.foreach(INPUT_CSV, :col_sep => COL_SEP) do |row|
       next if row[0].strip.downcase == "domain name"
       domain = row[0].strip.downcase
       next if domain.empty?
